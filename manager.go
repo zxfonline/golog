@@ -18,9 +18,10 @@ import (
 
 var (
 	//日志文件写入字节数据缓冲长度
-	LOG_WRITE_CACHE_SIZE = 4096
-	defaultWriter        = os.Stdout
-	logMap               = make(map[string]*Logger)
+	LOG_WRITE_CACHE_SIZE      = 4096
+	DUMPSTACK_OPEN       bool = true
+	defaultWriter             = os.Stdout
+	logMap                    = make(map[string]*Logger)
 	//全局输出格式
 	LstaticStdFlags int = LstdFlags | Lconsole
 	//全局输出等级
@@ -242,79 +243,79 @@ func Close() {
 }
 
 //--------------
-var trace *Logger = New("TRACE")
+var Trace *Logger = New("TRACE")
 
 //根据日志等级输出
 func Println(level LogLevel, v ...interface{}) {
-	trace.log(level, 3, "", v...)
+	Trace.log(level, 3, "", v...)
 }
 
 //根据日志等级格式化输出
 func Printf(level LogLevel, format string, v ...interface{}) {
-	trace.log(level, 3, format, v...)
+	Trace.log(level, 3, format, v...)
 }
 
 //操作日志输出
 func Logf(format string, v ...interface{}) {
-	trace.log(LEVEL_LOG, 3, format, v...)
+	Trace.log(LEVEL_LOG, 3, format, v...)
 }
 
 //操作日志输出
 func Logln(v ...interface{}) {
-	trace.log(LEVEL_LOG, 3, "", v...)
+	Trace.log(LEVEL_LOG, 3, "", v...)
 }
 
 //调试消息输出
 func Debugf(format string, v ...interface{}) {
-	trace.log(LEVEL_DEBUG, 3, format, v...)
+	Trace.log(LEVEL_DEBUG, 3, format, v...)
 }
 
 //调试消息输出
 func Debugln(v ...interface{}) {
-	trace.log(LEVEL_DEBUG, 3, "", v...)
+	Trace.log(LEVEL_DEBUG, 3, "", v...)
 }
 
 //提示消息输出
 func Infof(format string, v ...interface{}) {
-	trace.log(LEVEL_INFO, 3, format, v...)
+	Trace.log(LEVEL_INFO, 3, format, v...)
 }
 
 //提示消息输出
 func Infoln(v ...interface{}) {
-	trace.log(LEVEL_INFO, 3, "", v...)
+	Trace.log(LEVEL_INFO, 3, "", v...)
 }
 
 //警告消息输出
 func Warnf(format string, v ...interface{}) {
-	trace.log(LEVEL_WARN, 3, format, v...)
+	Trace.log(LEVEL_WARN, 3, format, v...)
 }
 
 //警告消息输出
 func Warnln(v ...interface{}) {
-	trace.log(LEVEL_WARN, 3, "", v...)
+	Trace.log(LEVEL_WARN, 3, "", v...)
 }
 
 //错误消息输出
 func Errorf(format string, v ...interface{}) {
-	trace.log(LEVEL_ERROR, 3, format, v...)
+	Trace.log(LEVEL_ERROR, 3, format, v...)
 }
 
 //错误消息输出
 func Errorln(v ...interface{}) {
-	trace.log(LEVEL_ERROR, 3, "", v...)
+	Trace.log(LEVEL_ERROR, 3, "", v...)
 }
 
 //严重错误消息输出
 func Fatalf(format string, v ...interface{}) {
-	trace.log(LEVEL_FATAL, 3, format, v...)
+	Trace.log(LEVEL_FATAL, 3, format, v...)
 }
 
 //严重错误消息输出
 func Fatalln(v ...interface{}) {
-	trace.log(LEVEL_FATAL, 3, "", v...)
+	Trace.log(LEVEL_FATAL, 3, "", v...)
 }
 
 //堆栈打印
 func DumpStack(level LogLevel) {
-	trace.log(level, 3, " Stack:\n%s", debug.Stack())
+	Trace.log(level, 3, " Stack:\n%s", debug.Stack())
 }

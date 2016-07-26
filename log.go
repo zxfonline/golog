@@ -192,11 +192,13 @@ func (l *Logger) output(level LogLevel, calldepth int, prefix string, s string) 
 	if len(s) > 0 && s[len(s)-1] != '\n' {
 		buf = append(buf, '\n')
 	}
-	switch level {
-	case LEVEL_ERROR, LEVEL_FATAL, LEVEL_WARN:
-		buf = append(buf, "Stack:\n"...)
-		buf = append(buf, debug.Stack()...)
-	default:
+	if DUMPSTACK_OPEN {
+		switch level {
+		case LEVEL_ERROR, LEVEL_FATAL, LEVEL_WARN:
+			buf = append(buf, "Stack:\n"...)
+			buf = append(buf, debug.Stack()...)
+		default:
+		}
 	}
 	if flag&Lfilexport != 0 {
 		_, err = out.Write(buf)

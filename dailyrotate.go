@@ -16,11 +16,11 @@ import (
 )
 
 type DailyRotate struct {
-	fdir string
-	ot   time.Time
-	f    *os.File
-	w    *bufio.Writer
-	mu   sync.Mutex
+	fdir     string
+	nextDate time.Time
+	f        *os.File
+	w        *bufio.Writer
+	mu       sync.Mutex
 }
 
 var (
@@ -50,11 +50,14 @@ func NewDailyRotate(pathfile string, cacheSize int) (wc io.WriteCloser, err erro
 	if f, err = openLogFile(pathfile); err != nil {
 		return
 	}
+	t := time.Now()
+	t = t.AddDate(0, 0, 1)
+	year, month, day := t.Date()
 	wc = &DailyRotate{
-		fdir: pathfile,
-		ot:   time.Now(),
-		f:    f,
-		w:    bufio.NewWriterSize(f, cacheSize),
+		fdir:     pathfile,
+		nextDate: time.Date(year, month, day, 0, 0, 0, 0, t.Location()),
+		f:        f,
+		w:        bufio.NewWriterSize(f, cacheSize),
 	}
 	return
 }
@@ -70,21 +73,15 @@ func openLogFile(pathfile string) (*os.File, error) {
 	return os.OpenFile(fileutil.PathJoin(dir, fn), DefaultFileFlag, DefaultFileMode)
 }
 
-//判断两个时间是否是同年同月同日
-func TimeSameDay(time1 time.Time, time2 time.Time) bool {
-	y1, m1, d1 := time1.Date()
-	y2, m2, d2 := time2.Date()
-	return y1 == y2 && int(m1) == int(m2) && d1 == d2
-}
-
 // io.WriteCloser.Write()
 func (r *DailyRotate) Write(buf []byte) (int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if TimeSameDay(r.ot, time.Now()) {
-		return r.w.Write(buf)
-	} else {
-		r.ot = time.Now()
+	if time.Now().After(r.nextDate) {
+		t := time.Now()
+		t = t.AddDate(0, 0, 1)
+		year, month, day := t.Date()
+		r.nextDate = time.Date(year, month, day, 0, 0, 0, 0, t.Location())
 		f, err := openLogFile(r.fdir)
 		if f != nil && err == nil {
 			r.w.Flush()
@@ -92,8 +89,8 @@ func (r *DailyRotate) Write(buf []byte) (int, error) {
 			r.f.Close()
 			r.f = f
 		}
-		return r.w.Write(buf)
 	}
+	return r.w.Write(buf)
 }
 
 // io.WriteCloser.Close()

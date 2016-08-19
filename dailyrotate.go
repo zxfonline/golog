@@ -19,7 +19,7 @@ type DailyRotate struct {
 	fdir     string
 	nextDate time.Time
 	f        *os.File
-	w        *bufio.Writer
+	w        logWriter
 	mu       sync.Mutex
 }
 
@@ -30,6 +30,28 @@ var (
 	// linux下需加上O_WRONLY或是O_RDWR
 	DefaultFileFlag int = os.O_APPEND | os.O_CREATE | os.O_RDWR
 )
+
+type logWriter interface {
+	io.Writer
+	Reset(io.Writer)
+	Flush() error
+}
+
+type fileWriter struct {
+	wr io.Writer
+}
+
+func (f *fileWriter) Reset(w io.Writer) {
+	f.wr = w
+}
+
+func (f *fileWriter) Flush() error {
+	return nil
+}
+
+func (f *fileWriter) Write(p []byte) (int, error) {
+	return f.wr.Write(p)
+}
 
 //构建一个每日写日志文件的写入器
 func NewDailyRotate(pathfile string, cacheSize int) (wc io.WriteCloser, err error) {
@@ -53,11 +75,20 @@ func NewDailyRotate(pathfile string, cacheSize int) (wc io.WriteCloser, err erro
 	t := time.Now()
 	t = t.AddDate(0, 0, 1)
 	year, month, day := t.Date()
-	wc = &DailyRotate{
-		fdir:     pathfile,
-		nextDate: time.Date(year, month, day, 0, 0, 0, 0, t.Location()),
-		f:        f,
-		w:        bufio.NewWriterSize(f, cacheSize),
+	if cacheSize > 0 {
+		wc = &DailyRotate{
+			fdir:     pathfile,
+			nextDate: time.Date(year, month, day, 0, 0, 0, 0, t.Location()),
+			f:        f,
+			w:        bufio.NewWriterSize(f, cacheSize),
+		}
+	} else {
+		wc = &DailyRotate{
+			fdir:     pathfile,
+			nextDate: time.Date(year, month, day, 0, 0, 0, 0, t.Location()),
+			f:        f,
+			w:        &fileWriter{f},
+		}
 	}
 	return
 }

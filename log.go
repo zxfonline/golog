@@ -56,12 +56,12 @@ const (
 )
 
 var LevelString = [...]string{
-	"\033[033;1mDEBUG\033[033;0m",
-	"\033[034;1mINFO \033[034;0m",
-	"\033[045;1mWARN \033[045;0m",
-	"\033[041;1mERROR\033[041;0m",
-	"\033[041;1mFATAL\033[041;0m",
-	"\033[032;1mLOG  \033[032;0m",
+	"\033[033;1m[DEBUG]\033[033;0m",
+	"\033[034;1m[INFO ]\033[034;0m",
+	"\033[045;1m[WARN ]\033[045;0m",
+	"\033[041;1m[ERROR]\033[041;0m",
+	"\033[041;1m[FATAL]\033[041;0m",
+	"\033[032;1m[LOG  ]\033[032;0m",
 }
 
 // A Logger represents an active logging object that generates lines of

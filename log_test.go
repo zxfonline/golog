@@ -21,16 +21,17 @@ func TestLevel(t *testing.T) {
 
 	InitConfig("./log4go.cfg")
 
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 3; i++ {
 		wg.Add(1)
 		go func(i int) {
 			logex.Debugf("go_%d 调试信息 %d %s", i, 1, "hello")
+			logex.Warnf("go_%d 警告信息 %d %s", i, 1, "hello")
 			logex.Errorf("go_%d 错误信息", i)
 			logex.Logf("go_%d 玩家操作日志", i)
 			wg.Done()
 		}(i)
 	}
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 3; i++ {
 		wg.Add(1)
 		go func(i int) {
 			logex2.Debugf("go_%d 调试信息 %d %s", i, 1, "hello")
@@ -39,7 +40,7 @@ func TestLevel(t *testing.T) {
 			wg.Done()
 		}(i)
 	}
-	time.Sleep(20 * time.Second)
+	time.Sleep(4 * time.Second)
 	Close()
 	wg.Wait()
 }

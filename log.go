@@ -41,7 +41,7 @@ const (
 	Lconsole   //控制台是否同时输出
 	Lfilexport //日志文件是否输出
 
-	LstdFlags = Ldate | Ltime | Lshortfile //标准输出格式
+	LstdFlags = Ldate | Ltime | Llongfile //标准输出格式
 )
 
 type LogLevel int
@@ -56,12 +56,25 @@ const (
 )
 
 var LevelString = [...]string{
-	"\033[033;1m[DEBUG]\033[033;0m",
-	"\033[034;1m[INFO ]\033[034;0m",
-	"\033[045;1m[WARN ]\033[045;0m",
-	"\033[041;1m[ERROR]\033[041;0m",
-	"\033[041;1m[FATAL]\033[041;0m",
-	"\033[032;1m[LOG  ]\033[032;0m",
+	"[DEBUG]",
+	"[INFO ]",
+	"[WARN ]",
+	"[ERROR]",
+	"[FATAL]",
+	"[LOG  ]",
+}
+
+func init() {
+	if runtime.GOOS != "windows" {
+		LevelString = [...]string{
+			"\033[033;1m[DEBUG]\033[033;0m",
+			"\033[034;1m[INFO ]\033[034;0m",
+			"\033[045;1m[WARN ]\033[045;0m",
+			"\033[041;1m[ERROR]\033[041;0m",
+			"\033[041;1m[FATAL]\033[041;0m",
+			"\033[032;1m[LOG  ]\033[032;0m",
+		}
+	}
 }
 
 // A Logger represents an active logging object that generates lines of
@@ -75,6 +88,7 @@ type Logger struct {
 	buf   []byte     // for accumulating text to write
 	Level LogLevel
 	Name  string
+	Trace bool
 }
 
 // New creates a new Logger.   The out variable sets the
@@ -192,9 +206,9 @@ func (l *Logger) output(level LogLevel, calldepth int, prefix string, s string) 
 	if len(s) > 0 && s[len(s)-1] != '\n' {
 		buf = append(buf, '\n')
 	}
-	if DUMPSTACK_OPEN {
+	if l.Trace {
 		switch level {
-		case LEVEL_ERROR, LEVEL_FATAL, LEVEL_WARN:
+		case LEVEL_WARN, LEVEL_ERROR, LEVEL_FATAL:
 			buf = append(buf, "Stack:\n"...)
 			buf = append(buf, debug.Stack()...)
 		default:

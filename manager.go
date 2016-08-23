@@ -19,7 +19,7 @@ import (
 var (
 	//日志文件写入字节数据缓冲长度
 	LOG_WRITE_CACHE_SIZE      = 4096
-	DUMPSTACK_OPEN       bool = true
+	DUMPSTACK_OPEN       bool = false
 	defaultWriter             = os.Stdout
 	logMap                    = make(map[string]*Logger)
 	//全局输出格式
@@ -122,11 +122,12 @@ func InitConfig(configurl string) {
 				}
 				logger.Flag = LstaticStdFlags
 				logger.Level = LstaticLevel
+				logger.Trace = DUMPSTACK_OPEN
 			}
 		}
 	}
 	// 2 解析日志详细输出方式
-	// eg: [logger]test=INFO,CONSOLE,DAILY_ROLLING_FILE
+	// eg: [logger]test=INFO,CONSOLE,DAILY_ROLLING_FILE,DUMPSTACK
 	if options, _ := cfg.SectionOptions("logger"); options != nil {
 		for _, name := range options {
 			args, err = cfg.String("logger", name)
@@ -175,8 +176,6 @@ func updateGlobalOutPut(arg string) {
 		} else {
 			Infoln("config no set out file path.eg:[daily_file] filePath=./test.daily.log")
 		}
-	}
-	switch arg {
 	case "DEBUG":
 		LstaticLevel = LEVEL_DEBUG
 	case "INFO":
@@ -187,6 +186,8 @@ func updateGlobalOutPut(arg string) {
 		LstaticLevel = LEVEL_ERROR
 	case "FATAL":
 		LstaticLevel = LEVEL_FATAL
+	case "DUMPSTACK":
+		DUMPSTACK_OPEN = true
 	}
 }
 
@@ -203,8 +204,6 @@ func updateOutPut(logger *Logger, arg string) {
 		} else {
 			Infoln("config no set out file path.eg:[daily_file] filePath=./test.daily.log")
 		}
-	}
-	switch arg {
 	case "DEBUG":
 		logger.Level = LEVEL_DEBUG
 	case "INFO":
@@ -215,6 +214,8 @@ func updateOutPut(logger *Logger, arg string) {
 		logger.Level = LEVEL_ERROR
 	case "FATAL":
 		logger.Level = LEVEL_FATAL
+	case "DUMPSTACK":
+		logger.Trace = true
 	}
 }
 

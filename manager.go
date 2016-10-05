@@ -6,6 +6,7 @@ package golog
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 	"sync"
@@ -77,6 +78,7 @@ func initWriter(cfg *config.Config, logCfgPath string) {
 		Infof("log4go file path=%s", filepath)
 		if len(filepath) > 0 {
 			if wc, err = NewDailyRotate(filepath, log_iocache_size); err != nil {
+				log.SetOutput(wc)
 				Infof("log file path error:%s", err)
 			}
 		}

@@ -32,7 +32,7 @@ const (
 	Lconsole   //控制台是否同时输出
 	Lfilexport //日志文件是否输出
 
-	LstdFlags = Ldate | Ltime | Llongfile //标准输出格式
+	LstdFlags = Ldate | Ltime | Lshortfile //标准输出格式
 )
 
 type LogLevel int

@@ -14,6 +14,8 @@ import (
 
 	"runtime/debug"
 
+	"github.com/zxfonline/fileutil"
+
 	"github.com/zxfonline/config"
 )
 
@@ -79,7 +81,7 @@ func initWriter(cfg *config.Config, logCfgPath string) {
 		if len(filepath) > 0 {
 			if wc, err = NewDailyRotate(filepath, log_iocache_size); err != nil {
 				log.SetOutput(wc)
-				Infof("log file path error:%s", err)
+				Warnf("log file path err:%s", err)
 			}
 		}
 	}
@@ -94,9 +96,10 @@ func ReLoad() {
 func InitConfig(configurl string) {
 	defer func() {
 		if rcv := recover(); rcv != nil {
-			Infof("recover=%s\nStack:\n%s\n", rcv, debug.Stack())
+			Warnf("recover=%s\nStack:\n%s\n", rcv, debug.Stack())
 		}
 	}()
+	configurl = fileutil.TransPath(configurl)
 	cfg, err := config.ReadDefault(configurl)
 	if err != nil {
 		panic(fmt.Errorf("加载日志文件配置表[%s]错误,error=%v", configurl, err))
@@ -110,7 +113,7 @@ func InitConfig(configurl string) {
 	if err == nil {
 		if len(args) > 0 {
 			types := strings.Split(args, ",")
-			Infof("Logger [global] setting:%+v", types)
+			Infof("Logger [log4go] rootLogger:%+v", types)
 			LstaticStdFlags = LstdFlags
 			for _, arg := range types {
 				arg = strings.TrimSpace(arg)
@@ -127,14 +130,16 @@ func InitConfig(configurl string) {
 				logger.Trace = DUMPSTACK_OPEN
 			}
 		}
+	} else {
+		Warnf("Logger [log4go] rootLogger err:%v", err)
 	}
 	// 2 解析日志详细输出方式
 	// eg: [logger]test=INFO,CONSOLE,DAILY_ROLLING_FILE,DUMPSTACK
-	if options, _ := cfg.SectionOptions("logger"); options != nil {
+	if options, err := cfg.SectionOptions("logger"); err == nil && options != nil {
 		for _, name := range options {
 			args, err = cfg.String("logger", name)
 			if err != nil {
-				Infof("logger[%s] propery error:%v", name, err)
+				Warnf("logger[%s] propery err:%v", name, err)
 				continue
 			}
 			logger, ok := logMap[name]
@@ -152,6 +157,8 @@ func InitConfig(configurl string) {
 				}
 			}
 		}
+	} else {
+		Infof("Logger [logger] err:%v", err)
 	}
 }
 

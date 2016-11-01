@@ -55,7 +55,7 @@ func (f *fileWriter) Write(p []byte) (int, error) {
 
 //构建一个每日写日志文件的写入器
 func NewDailyRotate(pathfile string, cacheSize int) (wc io.WriteCloser, err error) {
-	pathfile = strings.Replace(pathfile, "\\", "/", -1)
+	pathfile = fileutil.TransPath(pathfile)
 	dir, _ := path.Split(pathfile)
 	if _, err = os.Stat(dir); err != nil && !os.IsExist(err) {
 		if !os.IsNotExist(err) {

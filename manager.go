@@ -80,8 +80,9 @@ func initWriter(cfg *config.Config, logCfgPath string) {
 		Infof("log4go file path=%s", filepath)
 		if len(filepath) > 0 {
 			if wc, err = NewDailyRotate(filepath, log_iocache_size); err != nil {
-				log.SetOutput(wc)
 				Warnf("log file path err:%s", err)
+			} else {
+				log.SetOutput(wc)
 			}
 		}
 	}
@@ -169,7 +170,7 @@ func add(name string) *Logger {
 		fmt.Printf("Add Logger Error,contain Logger,name=[%s]\n", name)
 		return ol
 	}
-	logger := &Logger{Out: LstaticIo, Flag: LstaticStdFlags, Level: LstaticLevel, Name: name}
+	logger := &Logger{Out: LstaticIo, Flag: LstaticStdFlags, Level: LstaticLevel, Name: name, Trace: DUMPSTACK_OPEN}
 	logMap[logger.Name] = logger
 	return logger
 }

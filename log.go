@@ -95,7 +95,7 @@ func New(name string) *Logger {
 // The prefix appears at the beginning of each generated log line.
 // The flag argument defines the logging properties.
 func NewExt(name string, Out io.Writer, Flag int) *Logger {
-	return &Logger{Out: Out, Flag: Flag, Name: name}
+	return &Logger{Out: Out, Flag: Flag, Name: name, Trace: DUMPSTACK_OPEN}
 }
 
 // Cheap integer to fixed-width decimal ASCII.  Give a negative width to avoid zero-padding.

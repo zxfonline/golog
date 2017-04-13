@@ -1,6 +1,7 @@
 // Copyright 2016 zxfonline@sina.com. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package golog
 
 import (
@@ -248,6 +249,7 @@ func SetOutPutByName(name string, arg string) {
 }
 
 func Close() {
+	defer func() { recover() }()
 	if wc != nil {
 		wc.Close()
 	}

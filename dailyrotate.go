@@ -26,7 +26,7 @@ type DailyRotate struct {
 
 var (
 	// 默认的文件权限
-	DefaultFileMode os.FileMode = os.ModePerm
+	DefaultFileMode os.FileMode = 0644
 
 	// linux下需加上O_WRONLY或是O_RDWR
 	DefaultFileFlag int = os.O_APPEND | os.O_CREATE | os.O_RDWR
@@ -106,7 +106,7 @@ func openLogFile(pathfile string) (*os.File, error) {
 }
 
 // io.WriteCloser.Write()
-func (r *DailyRotate) Write(buf []byte) (int, error) {
+func (r *DailyRotate) Write(buf []byte) (n int, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if time.Now().After(r.nextDate) {
@@ -114,15 +114,15 @@ func (r *DailyRotate) Write(buf []byte) (int, error) {
 		t = t.AddDate(0, 0, 1)
 		year, month, day := t.Date()
 		r.nextDate = time.Date(year, month, day, 0, 0, 0, 0, t.Location())
-		f, err := openLogFile(r.fdir)
-		if f != nil && err == nil {
+		if f, err := openLogFile(r.fdir); f != nil && err == nil {
 			r.w.Flush()
 			r.w.Reset(f)
 			r.f.Close()
 			r.f = f
 		}
 	}
-	return r.w.Write(buf)
+	n, err = r.w.Write(buf)
+	return
 }
 
 // io.WriteCloser.Close()

@@ -8,15 +8,16 @@ import (
 	"time"
 )
 
-func randInt(min int32, max int32) int32 {
+func randInt(min int, max int) int {
 	rand.Seed(time.Now().UTC().UnixNano())
-	return min + rand.Int31n(max-min)
+	return min + rand.Intn(max-min)
 }
 
 func TestLevel(t *testing.T) {
 
 	wg := &sync.WaitGroup{}
-	logex := New("test")
+
+	logex := New("test1")
 	logex2 := New("test2")
 
 	InitConfig("./log4go.cfg")
@@ -45,17 +46,18 @@ func TestLevel(t *testing.T) {
 			wg.Done()
 		}(i)
 	}
-	time.Sleep(4 * time.Second)
-	Close()
 	wg.Wait()
+	Close()
 }
-func benchmark_Write(b *testing.B) {
+func BenchmarkWrite(b *testing.B) {
 	InitConfig("./log4go.cfg")
-	logex := New(fmt.Sprintf("test_%d", randInt(1, 1000)))
 	for i := 0; i < b.N; i++ {
-		logex.Debugf("go_%d 调试信息 %d %s", i, 1, "hello")
+		logex := New(fmt.Sprintf("test_%d", 10000000*randInt(0, 100)+i))
+		logex.Debugf("go_%d debug信息", i)
+		logex.Infof("go_%d info信息", i)
+		logex.Warnf("go_%d warn信息", i)
 		logex.Errorf("go_%d 错误信息", i)
+		logex.Fatalf("go_%d fatal信息", i)
 		logex.Logf("go_%d 玩家操作日志", i)
 	}
-	Close()
 }

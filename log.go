@@ -197,7 +197,7 @@ func (l *Logger) output(level LogLevel, calldepth int, prefix string, s string) 
 	}
 	if l.Trace {
 		switch level {
-		case LEVEL_WARN, LEVEL_ERROR, LEVEL_FATAL:
+		case LEVEL_ERROR, LEVEL_FATAL:
 			buf = append(buf, "Stack:\n"...)
 			buf = append(buf, debug.Stack()...)
 		default:

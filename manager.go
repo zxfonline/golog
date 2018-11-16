@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -77,11 +78,11 @@ func initWriter(cfg *config.Config, logCfgPath string) {
 	if err != nil {
 		log_iocache_size = LOG_WRITE_CACHE_SIZE
 	}
-	filepath, err := cfg.String("daily_file", "filePath")
+	filePath, err := cfg.String("daily_file", "filePath")
 	if err == nil {
-		Infof("log4go file path=%s", filepath)
-		if len(filepath) > 0 {
-			if wc, err = NewDailyRotate(filepath, log_iocache_size); err != nil {
+		Infof("log4go file path=%s", filePath)
+		if len(filePath) > 0 {
+			if wc, err = NewDailyRotate(filePath, log_iocache_size); err != nil {
 				Warnf("log file path err:%s", err)
 			} else {
 				log.SetOutput(wc)
@@ -261,9 +262,9 @@ func Close() {
 var Trace *Logger
 
 func init() {
-	appName := strings.Replace(os.Args[0], "\\", "/", -1)
-	_, name := path.Split(appName)
-	names := strings.Split(name, ".")
+	appName := path.Clean(os.Args[0])
+	_, appName = filepath.Split(appName)
+	names := strings.Split(appName, ".")
 	appName = names[0]
 	Trace = New(appName)
 }

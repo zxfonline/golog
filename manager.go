@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path"
 	"strings"
 	"sync"
 	"time"
@@ -37,7 +38,7 @@ var (
 	cfgPath   string
 )
 
-//tag、detailed 表示超时发生位置的两个字符串参数，start 程序开始执行的时间，timeLimit  函数执行超时阀值，单位是秒。
+//TimeoutWarning tag、detailed 表示超时发生位置的两个字符串参数，start 程序开始执行的时间，timeLimit  函数执行超时阀值，单位是秒。
 //eg：defer util.TimeoutWarning("SaveAppLogMain", "Total", time.Now(), float64(3))
 func TimeoutWarning(tag, detailed string, start time.Time, timeLimit float64, logger *Logger) {
 	dis := time.Now().Sub(start).Seconds()
@@ -89,12 +90,12 @@ func initWriter(cfg *config.Config, logCfgPath string) {
 	}
 }
 
-//重新读取日志配置文件进行输出更新
+//ReLoad 重新读取日志配置文件进行输出更新
 func ReLoad() {
 	InitConfig(cfgPath)
 }
 
-//初始化或更新日志文件信息
+//InitConfig 初始化或更新日志文件信息
 func InitConfig(configurl string) {
 	defer func() {
 		if rcv := recover(); rcv != nil {
@@ -230,14 +231,14 @@ func updateOutPut(logger *Logger, arg string) {
 	}
 }
 
-//设置全局输出参数
+//SetGlobalOutPut 设置全局输出参数
 func SetGlobalOutPut(arg string) {
 	mu.Lock()
 	defer mu.Unlock()
 	updateGlobalOutPut(arg)
 }
 
-//根据日志名称类型设置输出参数
+//SetOutPutByName 根据日志名称类型设置输出参数
 func SetOutPutByName(name string, arg string) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -248,6 +249,7 @@ func SetOutPutByName(name string, arg string) {
 	updateOutPut(logger, arg)
 }
 
+//Close 关闭
 func Close() {
 	defer func() { recover() }()
 	if wc != nil {
@@ -256,79 +258,87 @@ func Close() {
 }
 
 //--------------
-var Trace *Logger = New("TRACE")
+var Trace *Logger
 
-//根据日志等级输出
+func init() {
+	appName := strings.Replace(os.Args[0], "\\", "/", -1)
+	_, name := path.Split(appName)
+	names := strings.Split(name, ".")
+	appName = names[0]
+	Trace = New(appName)
+}
+
+//Println 根据日志等级输出
 func Println(level LogLevel, v ...interface{}) {
 	Trace.log(level, 3, "", v...)
 }
 
-//根据日志等级格式化输出
+//Printf 根据日志等级格式化输出
 func Printf(level LogLevel, format string, v ...interface{}) {
 	Trace.log(level, 3, format, v...)
 }
 
-//操作日志输出
+//Logf 操作日志输出
 func Logf(format string, v ...interface{}) {
 	Trace.log(LEVEL_LOG, 3, format, v...)
 }
 
-//操作日志输出
+//Logln 操作日志输出
 func Logln(v ...interface{}) {
 	Trace.log(LEVEL_LOG, 3, "", v...)
 }
 
-//调试消息输出
+//Debugf 调试消息输出
 func Debugf(format string, v ...interface{}) {
 	Trace.log(LEVEL_DEBUG, 3, format, v...)
 }
 
-//调试消息输出
+//Debugln 调试消息输出
 func Debugln(v ...interface{}) {
 	Trace.log(LEVEL_DEBUG, 3, "", v...)
 }
 
-//提示消息输出
+//Infof 提示消息输出
 func Infof(format string, v ...interface{}) {
 	Trace.log(LEVEL_INFO, 3, format, v...)
 }
 
-//提示消息输出
+//Infoln 提示消息输出
 func Infoln(v ...interface{}) {
 	Trace.log(LEVEL_INFO, 3, "", v...)
 }
 
-//警告消息输出
+//Warnf 警告消息输出
 func Warnf(format string, v ...interface{}) {
 	Trace.log(LEVEL_WARN, 3, format, v...)
 }
 
-//警告消息输出
+//Warnln 警告消息输出
 func Warnln(v ...interface{}) {
 	Trace.log(LEVEL_WARN, 3, "", v...)
 }
 
-//错误消息输出
+//Errorf 错误消息输出
 func Errorf(format string, v ...interface{}) {
 	Trace.log(LEVEL_ERROR, 3, format, v...)
 }
 
-//错误消息输出
+//Errorln 错误消息输出
 func Errorln(v ...interface{}) {
 	Trace.log(LEVEL_ERROR, 3, "", v...)
 }
 
-//严重错误消息输出
+//Fatalf 严重错误消息输出
 func Fatalf(format string, v ...interface{}) {
 	Trace.log(LEVEL_FATAL, 3, format, v...)
 }
 
-//严重错误消息输出
+//Fatalln 严重错误消息输出
 func Fatalln(v ...interface{}) {
 	Trace.log(LEVEL_FATAL, 3, "", v...)
 }
 
-//堆栈打印
+//DumpStack 堆栈打印
 func DumpStack(level LogLevel) {
 	Trace.log(level, 3, " Stack:\n%s", debug.Stack())
 }

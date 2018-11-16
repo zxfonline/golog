@@ -102,7 +102,7 @@ func openLogFile(pathfile string) (*os.File, error) {
 	} else {
 		fn = fn + "_" + time.Now().Format("20060102")
 	}
-	return os.OpenFile(fileutil.PathJoin(dir, fn), DefaultFileFlag, DefaultFileMode)
+	return os.OpenFile(path.Join(dir, fileutil.ExeName, "_", fn), DefaultFileFlag, DefaultFileMode)
 }
 
 // io.WriteCloser.Write()

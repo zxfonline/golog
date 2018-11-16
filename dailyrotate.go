@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -57,7 +58,7 @@ func (f *fileWriter) Write(p []byte) (int, error) {
 //构建一个每日写日志文件的写入器
 func NewDailyRotate(pathfile string, cacheSize int) (wc io.WriteCloser, err error) {
 	pathfile = fileutil.TransPath(pathfile)
-	dir, _ := path.Split(pathfile)
+	dir, _ := filepath.Split(pathfile)
 	if _, err = os.Stat(dir); err != nil && !os.IsExist(err) {
 		if !os.IsNotExist(err) {
 			return
@@ -95,14 +96,14 @@ func NewDailyRotate(pathfile string, cacheSize int) (wc io.WriteCloser, err erro
 }
 
 func openLogFile(pathfile string) (*os.File, error) {
-	dir, fn := path.Split(pathfile)
+	dir, fn := filepath.Split(pathfile)
 	ext := path.Ext(fn)
 	if ext != "" {
 		fn = strings.Split(fn, ext)[0] + "_" + time.Now().Format("20060102") + ext
 	} else {
 		fn = fn + "_" + time.Now().Format("20060102")
 	}
-	return os.OpenFile(path.Join(dir, fn), DefaultFileFlag, DefaultFileMode)
+	return os.OpenFile(filepath.Join(dir, fn), DefaultFileFlag, DefaultFileMode)
 }
 
 // io.WriteCloser.Write()

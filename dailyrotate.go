@@ -26,8 +26,10 @@ type DailyRotate struct {
 }
 
 var (
-	// 默认的文件权限
-	DefaultFileMode os.FileMode = 0644
+	//DefaultFileMode 默认的文件权限 0640
+	DefaultFileMode os.FileMode = 0640
+	//DefaultFolderMode 默认的文件夹权限 0750
+	DefaultFolderMode os.FileMode = 0750
 
 	// linux下需加上O_WRONLY或是O_RDWR
 	DefaultFileFlag int = os.O_APPEND | os.O_CREATE | os.O_RDWR
@@ -63,7 +65,7 @@ func NewDailyRotate(pathfile string, cacheSize int) (wc io.WriteCloser, err erro
 		if !os.IsNotExist(err) {
 			return
 		}
-		if err = os.MkdirAll(dir, DefaultFileMode); err != nil {
+		if err = os.MkdirAll(dir, DefaultFolderMode); err != nil {
 			return
 		}
 		if _, err = os.Stat(dir); err != nil {
